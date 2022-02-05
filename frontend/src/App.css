@@ -36,3 +36,55 @@
     transform: rotate(360deg);
   }
 }
+
+
+.icon-background {
+  background-color: white;
+  border: 3px solid black;
+  border-radius: 10%;
+  display: inline-block;
+}
+
+.light-padding {
+  padding: 5px 5px 5px 5px;
+}
+
+.center-circle {
+  position: relative;
+}
+
+.circle {
+  position: absolute;
+  background-color: white;
+  left: calc(50% - 60px);
+  top: calc(50% - 50px);
+  height: 100px;
+  width: 100px;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  color: black;
+}
+
+.circle:nth-child(1) {
+  transform: translateX(200px);
+}
+
+.circle:nth-child(2) {
+  transform: rotate(60deg) translateX(200px) rotate(-60deg);
+}
+
+.circle:nth-child(3) {
+  transform: rotate(120deg) translateX(200px) rotate(-120deg);
+}
+
+.circle:nth-child(4) {
+  transform: rotate(180deg) translateX(200px) rotate(-180deg);
+}
+
+.circle:nth-child(5) {
+  transform: rotate(240deg) translateX(200px) rotate(-240deg);
+}
+
+.circle:nth-child(6) {
+  transform: rotate(300deg) translateX(200px) rotate(-300deg);
+}
