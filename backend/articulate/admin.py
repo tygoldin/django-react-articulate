@@ -4,7 +4,7 @@ from .models import Artwork
 
 class ArtworkAdmin(admin.ModelAdmin):
     list_display = ('author', 'born_died', 'title', 'date', 'technique',
-                    'location', 'url', 'form', 'type', 'school', 'timeframe')
+                    'location', 'url', 'form', 'type', 'school', 'timeframe', 'lat', 'lng')
 
 # Register your models here.
 

@@ -121,10 +121,11 @@ hr {
 
 
 .btm-slider {
-  width: 100%;
+  width: 70%;
   position: absolute;
   z-index: 1;
   bottom: 0;
+  left: 20%;
   display: flex;
   justify-content: center;
   padding-bottom: 15px;
@@ -137,8 +138,8 @@ hr {
   padding: 15px 15px 15px 15px;
   box-sizing: border-box;
   width: 30%;
-  height: 75%;
-  top: 50%;
+  height: 70%;
+  top: 53%;
   transform: translate(0,-50%);
   right: 10%;
   z-index: 1;
@@ -174,7 +175,8 @@ hr {
 }
 
 .art-popup-img {
-  width: 100%;
+  /*box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 10px;*/
+  width: 95%;
 }
 
 .location-popup {
@@ -182,11 +184,11 @@ hr {
   flex-direction: column;
   padding: 15px 15px 15px 15px;
   box-sizing: border-box;
-  width: 45%;
-  height: 75%;
-  top: 50%;
+  width: 35%;
+  height: 70%;
+  top: 53%;
   transform: translate(0,-50%);
-  left: 10%;
+  left: 20%;
   z-index: 1;
   background-color: rgba(255,255,255,0.9);
   position: absolute;
@@ -201,8 +203,8 @@ hr {
 }
 
 .location-popup-art-img {
-  width: 188px;
-  height: 150px;
+  width: 150px;
+  height: 120px;
   object-fit: cover;
   border: 2px solid black;
   cursor: pointer;
@@ -226,4 +228,85 @@ hr {
 .my-node-exit-active {
   opacity: 0;
   transition: opacity 500ms;
+}
+
+.cluster-marker {
+  color: #fff;
+  background: #1978c8;
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.location-cntr {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.location-tooltip {
+  color: black;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.switch-view {
+  position: absolute;
+  z-index: 1;
+  top: 2%;
+  right: 1%;
+  width: 60px;
+  height: 30px;
+  padding: 3px 15px 4px 15px;
+  align-items: center;
+  border-radius: 25px;
+  justify-content: space-between;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+}
+
+.sidenav {
+  height: 100%;
+  width: 15%;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  gap: 15px;
+  padding-top: 15px;
+  background-color: rgb(255,255,255, 0.8);
+  position: fixed;
+  overflow-x: hidden;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav-bar {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  color: black;
+  font-size: 16px;
+}
+
+.sidenav-icon-cntr {
+  width: 30%;
+  display: block;
+}
+
+.sidenav-icon {
+  margin: auto;
+  display: block;
+}
+
+.sidenav-text {
+  width: 70%;
+  text-align: left;
+  font-weight: bold;
 }

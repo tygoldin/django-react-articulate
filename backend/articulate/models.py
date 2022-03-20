@@ -15,6 +15,8 @@ class Artwork(models.Model):
     type = models.CharField(max_length=30)
     school = models.CharField(max_length=30)
     timeframe = models.CharField(max_length=30)
+    lat = models.FloatField(default=0)
+    lng = models.FloatField(default=0)
 
     def _str_(self):
         return self.title

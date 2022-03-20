@@ -24,4 +24,7 @@ router.register(r'artworks', views.ArtworkView, 'artwork')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/location_list/', views.location_list),
+    path('api/insert_artworks/', views.insert_artworks),
+    path('api/artwork_list/', views.artwork_list)
 ]
