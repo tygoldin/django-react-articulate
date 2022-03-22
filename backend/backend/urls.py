@@ -26,5 +26,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/location_list/', views.location_list),
     path('api/insert_artworks/', views.insert_artworks),
-    path('api/artwork_list/', views.artwork_list)
+    path('api/insert_artworks_desc_colors/', views.insert_artworks_desc_colors),
+    path('api/artwork_list/', views.artwork_list),
+    path('api/get_recommendations/', views.get_recommendations),
+    path('api/get_color_palette/', views.get_color_palette),
+    path('api/test_route/', views.test_route)
 ]
