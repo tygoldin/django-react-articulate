@@ -35,71 +35,71 @@ def artwork_list(request):
         return Response(df.to_dict('records'))
         # return Response(None)
 
-@api_view(['GET', 'POST'])
-def insert_artworks(request):
-    if request.method == 'GET':
-        with open('catalog_coords.csv') as f:
-            reader = csv.reader(f)
-            next(reader)
-            for row in reader:
-                _, created = Artwork.objects.get_or_create(
-                    author=row[0],
-                    born_died=row[1],
-                    title=row[2],
-                    date=row[3],
-                    technique=row[4],
-                    location=row[5],
-                    url=row[6],
-                    form=row[7],
-                    type=row[8],
-                    school=row[9],
-                    timeframe=row[10],
-                    lat=row[11],
-                    lng=row[12]
+# @api_view(['GET', 'POST'])
+# def insert_artworks(request):
+#     if request.method == 'GET':
+#         with open('catalog_coords.csv') as f:
+#             reader = csv.reader(f)
+#             next(reader)
+#             for row in reader:
+#                 _, created = Artwork.objects.get_or_create(
+#                     author=row[0],
+#                     born_died=row[1],
+#                     title=row[2],
+#                     date=row[3],
+#                     technique=row[4],
+#                     location=row[5],
+#                     url=row[6],
+#                     form=row[7],
+#                     type=row[8],
+#                     school=row[9],
+#                     timeframe=row[10],
+#                     lat=row[11],
+#                     lng=row[12]
 
-                )
-        return Response(None)
+#                 )
+#         return Response(None)
 
-@api_view(['GET', 'POST'])
-def insert_artworks_desc_colors(request):
-    if request.method == 'GET':
-        Artwork.objects.all().delete()
-        with open('catalog_coord_keyword_color.csv', encoding='latin1') as f:
-            reader = csv.reader(f)
-            next(reader)
-            for row in reader:
-                #Handling NA values in lat-long
-                if row[11] == '#N/A':
-                    row[11] = 0
-                if row[12] == '#N/A':
-                    row[12] = 0
+# @api_view(['GET', 'POST'])
+# def insert_artworks_desc_colors(request):
+#     if request.method == 'GET':
+#         Artwork.objects.all().delete()
+#         with open('catalog_coord_keyword_color.csv', encoding='latin1') as f:
+#             reader = csv.reader(f)
+#             next(reader)
+#             for row in reader:
+#                 #Handling NA values in lat-long
+#                 if row[11] == '#N/A':
+#                     row[11] = 0
+#                 if row[12] == '#N/A':
+#                     row[12] = 0
 
-                _, created = Artwork.objects.get_or_create(
-                    author=row[0],
-                    born_died=row[1],
-                    title=row[2],
-                    date=row[3],
-                    technique=row[4],
-                    location=row[5],
-                    url=row[6],
-                    form=row[7],
-                    type=row[8],
-                    school=row[9],
-                    timeframe=row[10],
-                    lat=row[11],
-                    lng=row[12],
-                    descriptions=row[13],
-                    keywords=row[14],
-                    color_0=row[15],
-                    color_1=row[16],
-                    color_2=row[17],
-                    color_3=row[18],
-                    color_4=row[19],
-                    color_5=row[20],
-                    cluster_id=row[21]
+#                 _, created = Artwork.objects.get_or_create(
+#                     author=row[0],
+#                     born_died=row[1],
+#                     title=row[2],
+#                     date=row[3],
+#                     technique=row[4],
+#                     location=row[5],
+#                     url=row[6],
+#                     form=row[7],
+#                     type=row[8],
+#                     school=row[9],
+#                     timeframe=row[10],
+#                     lat=row[11],
+#                     lng=row[12],
+#                     descriptions=row[13],
+#                     keywords=row[14],
+#                     color_0=row[15],
+#                     color_1=row[16],
+#                     color_2=row[17],
+#                     color_3=row[18],
+#                     color_4=row[19],
+#                     color_5=row[20],
+#                     cluster_id=row[21]
 
-                )
-        return Response(None)
+#                 )
+#         return Response(None)
 
 @api_view(['GET', 'POST'])
 def test_route(request):
