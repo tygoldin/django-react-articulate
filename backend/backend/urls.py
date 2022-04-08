@@ -30,5 +30,10 @@ urlpatterns = [
     path('api/artwork_list/', views.artwork_list),
     path('api/get_recommendations/', views.get_recommendations),
     path('api/get_color_palette/', views.get_color_palette),
-    path('api/test_route/', views.test_route)
+    path('api/test_route/', views.test_route),
+    path('api/get_random_artwork/', views.get_random_artwork),
+    path('api/get_random_artworks/', views.get_random_artworks),
+    path('api/get_random_artworks_time_period/', views.get_random_artworks_time_period),
+    path('api/get_filtered_artworks_by_timeframe/', views.get_filtered_artworks_by_timeframe),
+    path('api/get_filtered_artworks_for_timeframe/', views.get_filtered_artworks_for_timeframe),
 ]
