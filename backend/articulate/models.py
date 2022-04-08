@@ -27,5 +27,8 @@ class Artwork(models.Model):
     color_5 = models.CharField(max_length=40)
     cluster_id = models.IntegerField(default=0)
 
+    class Meta: 
+        db_table = "artwork"
+
     def _str_(self):
         return self.title
