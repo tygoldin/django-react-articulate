@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 import csv
 import pandas as pd
 import random
+from django.db.models import Q
 # Create your views here.
 
 
@@ -29,11 +30,8 @@ def artwork_list(request):
     if request.method == 'GET':
         location = request.GET.get('location', '')
         artworks = Artwork.objects.filter(location=location).values()
-        print(artworks)
         df = pd.DataFrame(list(artworks))
-        # print(df)
         return Response(df.to_dict('records'))
-        # return Response(None)
 
 @api_view(['GET', 'POST'])
 def insert_artworks(request):
@@ -116,8 +114,8 @@ def get_recommendations(request):
         current_cluster = current_art['cluster_id']
         
         cluster_artworks = Artwork.objects.filter(cluster_id=current_cluster).values()
-        recos = random.sample(list(cluster_artworks),10)
-        return Response([art['id'] for art in recos])
+        recos = random.sample(list(cluster_artworks),50)
+        return Response([art for art in recos])
 
 
 @api_view(['GET', 'POST'])
@@ -126,3 +124,93 @@ def get_color_palette(request):
         artwork_id = request.GET.get('artwork_id', '')
         current_art = Artwork.objects.filter(id=artwork_id).values()[0]
         return Response({key: value for key, value in current_art.items() if key.startswith('color')})
+
+@api_view(['GET', 'POST'])
+def get_random_artwork(request):
+    if request.method == 'GET':
+        items = list(Artwork.objects.all())
+        return Response(ArtworkSerializer(random.choice(items)).data)
+
+@api_view(['GET', 'POST'])
+def get_random_artworks(request):
+    if request.method == 'GET':
+        items = list(Artwork.objects.all().values())
+        df = pd.DataFrame(random.sample(items, 100))
+        return Response(df.to_dict('records'))
+
+@api_view(['GET', 'POST'])
+def get_random_artworks_time_period(request):
+    if request.method == 'GET':
+        timeframe = request.GET.get('timeframe', '')
+        items = list(Artwork.objects.filter(timeframe=timeframe).values())
+        if len(items) < 100:
+            df = pd.DataFrame(random.sample(items, len(items) - 1))
+        else:
+            df = pd.DataFrame(random.sample(items, 100))
+        return Response(df.to_dict('records'))
+
+@api_view(['GET', 'POST'])
+def get_filtered_artworks_by_timeframe(request):
+    if request.method == 'GET':
+        return Response(None)
+    if request.method == 'POST':
+        forms = request.data['forms']
+        types = request.data['types']
+        schools = request.data['schools']
+        techniques = request.data['techniques']
+        form_filter_query = Q()
+        for form in forms:
+            form_filter_query.add(Q(form=form), Q.OR)
+        type_filter_query = Q()
+        for type in types:
+            type_filter_query.add(Q(type=type), Q.OR)
+        school_filter_query = Q()
+        for school in schools:
+            school_filter_query.add(Q(school=school), Q.OR)
+        technique_filter_query = Q()
+        for technique in techniques:
+            technique_filter_query.add(Q(technique__contains=technique), Q.OR)
+        filter_query = Q()
+        filter_query.add(form_filter_query, Q.AND)
+        filter_query.add(type_filter_query, Q.AND)
+        filter_query.add(school_filter_query, Q.AND)
+        filter_query.add(technique_filter_query, Q.AND)
+        items = list(Artwork.objects.filter(filter_query).values())
+        df = pd.DataFrame(items)
+        if df.empty:
+            return Response({})
+        df = df.groupby(['timeframe']).count()
+        return Response(df.to_dict('index'))
+
+@api_view(['GET', 'POST'])
+def get_filtered_artworks_for_timeframe(request):
+    if request.method == 'GET':
+        return Response(None)
+    if request.method == 'POST':
+        forms = request.data['forms']
+        types = request.data['types']
+        schools = request.data['schools']
+        techniques = request.data['techniques']
+        timeframe = request.data['timeframe']
+        form_filter_query = Q()
+        for form in forms:
+            form_filter_query.add(Q(form=form), Q.OR)
+        type_filter_query = Q()
+        for type in types:
+            type_filter_query.add(Q(type=type), Q.OR)
+        school_filter_query = Q()
+        for school in schools:
+            school_filter_query.add(Q(school=school), Q.OR)
+        technique_filter_query = Q()
+        for technique in techniques:
+            technique_filter_query.add(Q(technique__contains=technique), Q.OR)
+        filter_query = Q()
+        filter_query.add(form_filter_query, Q.AND)
+        filter_query.add(type_filter_query, Q.AND)
+        filter_query.add(school_filter_query, Q.AND)
+        filter_query.add(technique_filter_query, Q.AND)
+        filter_query.add(Q(timeframe=timeframe), Q.AND)
+        items = list(Artwork.objects.filter(filter_query)[:200].values())
+        df = pd.DataFrame(items)
+        print(df)
+        return Response(df.to_dict('records'))

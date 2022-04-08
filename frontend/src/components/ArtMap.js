@@ -3,7 +3,7 @@ import GoogleMapReact from 'google-map-react';
 import {
     Bank2,
     BarChart,
-    Dice3,
+    Dice3, FilterLeft,
     Globe,
     Grid3x3,
     Map,
@@ -16,6 +16,13 @@ import {
 import {Slider} from "@mui/material";
 import {CSSTransition} from 'react-transition-group';
 import useSupercluster from "use-supercluster";
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
+import {ArtPopup} from "./ArtPopup";
+import {LocationPopup} from "./LocationPopup";
+import {RecommendationPage} from "./RecommendationPage";
+import MultipleSelectChip from "./MultipleSelectChip";
+import {AnalyticsPage} from "./AnalyticsPage";
 
 
 const Marker = ({ children }) => children;
@@ -105,9 +112,9 @@ export function ArtMap(props) {
     const mapRef = useRef();
 
     const [center, setCenter] = useState()
-    const [zoom, setZoom] = useState(11)
+    const [zoom, setZoom] = useState(1)
 
-    const [rangeValues, setRangeValues] = useState([200, 2000])
+    const [rangeValues, setRangeValues] = useState([200, 1900])
 
     const [bounds, setBounds] = useState([]);
 
@@ -120,6 +127,15 @@ export function ArtMap(props) {
     const [points, setPoints] = useState([]);
 
     const [nightMode, setNightMode] = useState(false);
+
+    const [showRecPage, setRecPage] = useState(false);
+
+    const [showAnalyticsPage, setAnalyticsPage] = useState(false);
+
+    const [form, setForm] = useState([]);
+    const [type, setType] = useState([]);
+    const [school, setSchool] = useState([]);
+    const [technique, setTechnique] = useState([]);
 
     const defaultMapOptions = {
         fullscreenControl: false,
@@ -156,6 +172,37 @@ export function ArtMap(props) {
             });
     }, [])
 
+    useEffect(() => {
+    }, [form, type, school, technique])
+
+    function checkFilters(artwork) {
+        if (form.length > 0 && !form.includes(artwork.form)){
+            return false;
+        }
+        if (type.length > 0 && !type.includes(artwork.type)){
+            return false;
+        }
+        if (school.length > 0 && !school.includes(artwork.school)){
+            return false;
+        }
+        if (artwork.timeframe && artwork.timeframe.length > 0) {
+            if (parseInt(artwork.timeframe.substring(0,4)) > rangeValues[0] &&
+                parseInt(artwork.timeframe.slice(-4)) <= rangeValues[1]){
+            } else {
+                return false;
+            }
+        }
+        if (technique.length > 0) {
+            for (let i = 0; i < technique.length; i++) {
+                if (artwork.technique.toLowerCase().includes(technique[i].toLowerCase())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
     return (
         <div className = "map-container" style={{ height: '100vh', width: '100%' }}>
             {/*<div className = {"side-bar"}></div>*/}
@@ -166,13 +213,13 @@ export function ArtMap(props) {
                             valueLabelFormat = {(value) => {return value + " CE"}}
                             onChange={(e, val) => setRangeValues(val)}
                             min={200}
-                            max={2000}/>
+                            max={1900}/>
                 </div>
             </div>
-            <div className = "switch-view">
-                <Bank2 size={24} color={"black"}/>
-                <PersonFill size={24} color={"black"}/>
-            </div>
+            {/*<div className = "switch-view">*/}
+            {/*    <Bank2 size={24} color={"black"}/>*/}
+            {/*    <PersonFill size={24} color={"black"}/>*/}
+            {/*</div>*/}
             <div className = "sidenav">
                 <div className="sidenav-bar">
                     <div className="sidenav-icon-cntr">
@@ -186,7 +233,11 @@ export function ArtMap(props) {
                     <div className="sidenav-icon-cntr">
                         <Globe className="sidenav-icon" size={20} color={"black"} />
                     </div>
-                    <div className="sidenav-text">
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             setRecPage(false);
+                             setAnalyticsPage(false);
+                         }}>
                         Google Maps
                     </div>
                 </div>
@@ -194,7 +245,11 @@ export function ArtMap(props) {
                     <div className="sidenav-icon-cntr">
                         <BarChart className="sidenav-icon" size={20} color={"black"} />
                     </div>
-                    <div className="sidenav-text">
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             setAnalyticsPage(!showAnalyticsPage);
+                             setRecPage(false);
+                         }}>
                         Analytics
                     </div>
                 </div>
@@ -202,7 +257,11 @@ export function ArtMap(props) {
                     <div className="sidenav-icon-cntr">
                         <Grid3x3 className="sidenav-icon" size={20} color={"black"} />
                     </div>
-                    <div className="sidenav-text">
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             setRecPage(!showRecPage);
+                             setAnalyticsPage(false);
+                         }}>
                         Recommended
                     </div>
                 </div>
@@ -210,96 +269,107 @@ export function ArtMap(props) {
                     <div className="sidenav-icon-cntr">
                         <Dice3 className="sidenav-icon" size={20} color={"black"} />
                     </div>
-                    <div className="sidenav-text">
-                        Random Artwork
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             fetch(`/api/get_random_artwork/`,
+                                 {method: "GET"}).then(response => response.json())
+                                 .then(data => {
+                                     setArtPopup(data);
+                                 });
+                         }}>
+                        Random
                     </div>
                 </div>
-                <div className="sidenav-bar" onClick={() => setNightMode(!nightMode)}>
+                {/*<div className="sidenav-bar" onClick={() => setNightMode(!nightMode)}>*/}
+                {/*    <div className="sidenav-icon-cntr">*/}
+                {/*        <Moon className="sidenav-icon" size={20} color={"black"} />*/}
+                {/*    </div>*/}
+                {/*    <div className="sidenav-text">*/}
+                {/*        Night Mode*/}
+                {/*    </div>*/}
+                {/*</div>*/}
+                <hr className="side-nav-divider" />
+                <div className="sidenav-bar">
                     <div className="sidenav-icon-cntr">
-                        <Moon className="sidenav-icon" size={20} color={"black"} />
+                        <FilterLeft className="sidenav-icon" size={20} color={"black"} />
                     </div>
                     <div className="sidenav-text">
-                        Night Mode
+                        Filters
                     </div>
+                </div>
+                <div className="filter-list">
+                    <MultipleSelectChip name="Form"
+                                        names={[
+                                            "architecture", "ceramics", "furniture", "glassware", "graphics",
+                                            "illumination", "metalwork", "mosaic", "others", "painting", "sculpture",
+                                            "stained-glass", "tapestry"
+                                        ]}
+                                        setFields={setForm}/>
+                    <MultipleSelectChip name="Type"
+                                        names={[
+                                            "genre", "historical", "interior", "landscape", "mythological", "other",
+                                            "portrait", "religious", "still-life", "study"
+                                        ]}
+                                        setFields={setType}/>
+                    <MultipleSelectChip name="School"
+                                        names={[
+                                            "American", "Austrian", "Belgian", "Catalan", "Danish", "Dutch",
+                                            "English", "Finnish", "Flemish", "French", "German", "Greek", "Hungarian",
+                                            "Irish", "Italian", "Netherlandish", "Other", "Portuguese", "Russian",
+                                            "Scottish", "Spanish", "Swedish", "Swiss"
+                                        ]}
+                                        setFields={setSchool}/>
+                    <MultipleSelectChip name="Technique"
+                                        names={[
+                                            "Fresco", "Oil on Canvas", "Oil on Plaster", "Oil on Panel", "Oil on Wood",
+                                            "Etching", "Stained Glass", "Oil on Oak Panel", "Ink", "Watercolour",
+                                            "Black Chalk", "Pencil", "Lithograph", "Pencil", "Wood", "Pen", "Photo",
+                                            "Sandstone", "Bronzed Plaster", "Carved Limewood", "Stone", "Sardonyx",
+                                            "Tempera", "Marble", "Manuscript", "Lead", "Poplar", "Tapestry",
+                                            "Engraving", "Bronze", "Alabaster", "Gold", "Panel", "Mosaic", "Metalpoint",
+                                            "Incunable", "Boxwood", "Oak", "Drawing", "Glass", "Earthenware", "Crayon",
+                                            "Copper", "Travertine", "Wax", "Stucco", "Plaster", "Grisaille", "Silver",
+                                            "Lapis Lazuli", "Poryphry", "Ivory", "Mural", "Porcelain", "Terracotta",
+                                            "Intarsia", "Parchment", "Pine"
+                                        ]}
+                                        setFields={setTechnique}/>
                 </div>
             </div>
 
-            <CSSTransition
-                in={artPopup && Object.keys(artPopup).length !== 0}
-                timeout={200}
-                classNames="my-node">
 
-                <>
-                    {artPopup && Object.keys(artPopup).length !== 0 ?
-                        <div className = "art-popup">
-                            <div className = "popup-header-cntr">
-                                <div className = "popup-header">
-                                    <div className = "popup-title">{artPopup.title}</div>
-                                    <XSquare onClick = {() => setArtPopup({})}
-                                             cursor = "pointer"
-                                             color = "black"
-                                             size={16} />
-                                </div>
-                                <hr style={{"width":"100%", "height":"2px"}}/>
-                            </div>
+            <RecommendationPage showRecPage={showRecPage}
+                                checkFilters={checkFilters}
+                                setArtPopup={setArtPopup}
+                                rangeValues={rangeValues}/>
 
-                            <div className = "art-popup-cntr">
-                                <img key = {artPopup.id}
-                                     className = "art-popup-img"
-                                     src = {artPopup && Object.keys(artPopup).length !== 0 ? ('https://www.wga.hu/detail/' + artPopup.url.split("/html/").pop().slice(0, -4) + "jpg") : null}
-                                     alt = {artPopup.title}/>
-                                <div className = "art-popup-text">Description</div>
-                                <div className = "art-popup-text">Author: {artPopup.author}</div>
-                                <div className = "art-popup-text">Born-Died: {artPopup.born_died}</div>
-                                <div className = "art-popup-text">Date: {artPopup.date}</div>
-                                <div className = "art-popup-text">Technique: {artPopup.technique}</div>
-                                <div className = "art-popup-text">Location: {artPopup.location}</div>
-                                <div className = "art-popup-text">Form: {artPopup.form}</div>
-                                <div className = "art-popup-text">Type: {artPopup.type}</div>
-                                <div className = "art-popup-text">School: {artPopup.school}</div>
-                            </div>
-                        </div> : null}
-                </>
-            </CSSTransition>
+            <AnalyticsPage checkFilters={checkFilters}
+                           showAnalyticsPage={showAnalyticsPage}
+                           form={form}
+                           type={type}
+                           school={school}
+                           technique={technique}
+                           rangeValues={rangeValues}
+                           setArtPopup={setArtPopup}/>
 
-            <CSSTransition
-                in={locationPopup && Object.keys(locationPopup).length !== 0}
-                timeout={200}
-                classNames="my-node">
-                <>
-                    {locationPopup && Object.keys(locationPopup).length !== 0 ?
-                        <div className = "location-popup">
-                            <div className = "popup-header-cntr">
-                                <div className = "popup-header">
-                                    <div className = "popup-title">{locationPopup.location}</div>
-                                    <XSquare onClick = {() => setLocationPopup({})}
-                                             cursor = "pointer"
-                                             color = "black"
-                                             size={16} />
-                                </div>
-                                <hr style={{"width":"100%", "height":"2px"}}/>
-                            </div>
+            <ArtPopup
+                artPopup = {artPopup}
+                setArtPopup = {setArtPopup}
+                rangeValues = {rangeValues}
+                setLocationPopup = {setLocationPopup}
+                zoom={zoom}
+                setZoom={setZoom}
+                setCenter={setCenter}
+                setShowRecPage={setRecPage}
+                checkFilters={checkFilters}
+            />
 
-                            <div className = "location-popup-art-cntr">
-                                {
-                                    locationPopup.children.map((object, i) => {
-                                        if (parseInt(object.timeframe.substring(0,4)) > rangeValues[0] &&
-                                            parseInt(object.timeframe.slice(-4)) < rangeValues[1]) {
-                                            return <div key = {i}>
-                                                <img className = "location-popup-art-img"
-                                                     src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
-                                                     alt = {object.title}
-                                                     onClick = {() => setArtPopup(object)}/>
-                                                <div className = "location-popup-art-text">{object.title}</div>
-                                            </div>
-                                        }
-
-                                    })
-                                }
-                            </div>
-                        </div> : null}
-                </>
-            </CSSTransition>
+            <LocationPopup
+                locationPopup = {locationPopup}
+                setLocationPopup = {setLocationPopup}
+                rangeValues = {rangeValues}
+                setArtPopup = {setArtPopup}
+                checkFilters = {checkFilters}
+            />
 
             <GoogleMapReact
                 bootstrapURLKeys={{key: 'AIzaSyBKOMmCvABFy3nIvY5vf36hN4fuRfMHsmg'}}
@@ -378,6 +448,7 @@ export function ArtMap(props) {
                         setArtPopup={setArtPopup}
                         setLocationPopup={setLocationPopup}
                         nightMode={nightMode}
+                        checkFilters = {checkFilters}
                     />);
 
                 })}
@@ -389,8 +460,10 @@ export function ArtMap(props) {
 
 function Location(props) {
     const [artworks, setArtworks] = useState([]);
+    const filteredItems = artworks.filter(artwork => props.checkFilters(artwork))
 
     const [show, setShow] = useState(false);
+
 
     useEffect(() => {
         if (props.zoom > 17 &&
@@ -399,11 +472,6 @@ function Location(props) {
             props.lng > props.bounds[0] &&
             props.lng < props.bounds[2]
         ){
-            fetch(`/api/artwork_list?location=${encodeURIComponent(props.location)}`,
-                {method: "GET"}).then(response => response.json())
-                .then(data => {
-                    setArtworks(data);
-                });
         } else {
             setShow(false);
         }
@@ -424,10 +492,8 @@ function Location(props) {
                     <hr/>
                     <div className="location-art-cntr">
                         {
-                            artworks.map((object, i) => {
+                            filteredItems.map((object, i) => {
                                 if (i > 5) return;
-                                if (parseInt(object.timeframe.substring(0,4)) > props.rangeValues[0] &&
-                                    parseInt(object.timeframe.slice(-4)) < props.rangeValues[1])
                                 return <div key = {object.id}>
                                             <img className = "location-art-img"
                                                  src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
@@ -460,6 +526,11 @@ function Location(props) {
                                  props.setZoom(18);
                              }
                              props.setCenter({lat: props.lat - .0007, lng: props.lng + .00115});
+                             fetch(`/api/artwork_list?location=${encodeURIComponent(props.location)}`,
+                                 {method: "GET"}).then(response => response.json())
+                                 .then(data => {
+                                     setArtworks(data);
+                             });
                              setShow(true);
                          }} />
                   </div>}
