@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ArtworkSerializer
-from .models import Artwork
+from .models import Artwork, Interactions
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -214,3 +214,10 @@ def get_filtered_artworks_for_timeframe(request):
         df = pd.DataFrame(items)
         print(df)
         return Response(df.to_dict('records'))
+
+@api_view(['GET', 'POST'])
+def get_user_interactions(request):
+    if request.method == 'GET':
+        current_user = request.user
+        interactions = Interactions.objects.filter(user=current_user).values()
+        return Response(interactions)

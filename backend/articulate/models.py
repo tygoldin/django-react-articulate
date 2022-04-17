@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 
 
@@ -30,5 +30,19 @@ class Artwork(models.Model):
     class Meta: 
         db_table = "artwork"
 
+    def _str_(self):
+        return self.title
+
+class Interactions(models.Model):
+    user = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.CASCADE,
+    )
+    view_count = models.IntegerField(default=0)
+    artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE)
+    liked = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "interactions"
     def _str_(self):
         return self.title
