@@ -25,14 +25,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/location_list/', views.location_list),
-    path('api/insert_artworks/', views.insert_artworks),
-    path('api/insert_artworks_desc_colors/', views.insert_artworks_desc_colors),
+    # path('api/insert_artworks/', views.insert_artworks),
+    # path('api/insert_artworks_desc_colors/', views.insert_artworks_desc_colors),
     path('api/artwork_list/', views.artwork_list),
     path('api/get_recommendations/', views.get_recommendations),
     path('api/get_color_palette/', views.get_color_palette),
-<<<<<<< Updated upstream
-    path('api/test_route/', views.test_route)
-=======
     path('api/test_route/', views.test_route),
     path('api/get_random_artwork/', views.get_random_artwork),
     path('api/get_random_artworks/', views.get_random_artworks),
@@ -44,5 +41,4 @@ urlpatterns = [
     path('api/populate_interactions/',views.populate_interactions),
     path('api/update_views/',views.update_views),
     path('api/update_rating/',views.update_rating)
->>>>>>> Stashed changes
 ]

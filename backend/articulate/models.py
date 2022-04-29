@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 
 
@@ -27,10 +27,11 @@ class Artwork(models.Model):
     color_5 = models.CharField(max_length=40)
     cluster_id = models.IntegerField(default=0)
 
+    class Meta: 
+        db_table = "artwork"
+
     def _str_(self):
         return self.title
-<<<<<<< Updated upstream
-=======
 
 class Interactions(models.Model):
     user = models.ForeignKey(
@@ -57,4 +58,3 @@ class userRecommendations(models.Model):
         db_table = "user_recommendations"
     def _str_(self):
         return self.title
->>>>>>> Stashed changes
