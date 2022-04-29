@@ -22,7 +22,7 @@ In the root directory
 
 then
 ```bash
-  pip install -r requirements.txt # should start django virtual environment
+  pip install -r requirements.txt
 ```
 
 then 
