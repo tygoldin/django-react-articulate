@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Artwork, Interactions
+from .models import Artwork, Interactions, userRecommendations
 
 
 class ArtworkSerializer(serializers.ModelSerializer):
@@ -12,4 +12,10 @@ class ArtworkSerializer(serializers.ModelSerializer):
 class InteractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interactions
-        fields = ('id', 'user', 'view_count', 'artwork', 'liked')
+        fields = ('id', 'user', 'view_count', 'artwork', 'rating')
+
+
+class RecommendationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = userRecommendations
+        fields = ('id', 'recommendations', 'user')

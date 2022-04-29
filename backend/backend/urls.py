@@ -36,5 +36,9 @@ urlpatterns = [
     path('api/get_random_artworks_time_period/', views.get_random_artworks_time_period),
     path('api/get_filtered_artworks_by_timeframe/', views.get_filtered_artworks_by_timeframe),
     path('api/get_filtered_artworks_for_timeframe/', views.get_filtered_artworks_for_timeframe),
-    path('api/get_user_interactions', views.get_user_interactions)
+    path('api/get_user_interactions/', views.get_user_interactions),
+    path('api/populate_users/',views.populate_users),
+    path('api/populate_interactions/',views.populate_interactions),
+    path('api/update_views/',views.update_views),
+    path('api/update_rating/',views.update_rating)
 ]

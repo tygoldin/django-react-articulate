@@ -40,9 +40,21 @@ class Interactions(models.Model):
     )
     view_count = models.IntegerField(default=0)
     artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE)
-    liked = models.BooleanField(default=False)
+    rating = models.IntegerField(default=0)
 
     class Meta:
         db_table = "interactions"
+    def _str_(self):
+        return self.title
+
+class userRecommendations(models.Model):
+    recommendations = models.CharField(max_length=10000)
+    user = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        db_table = "user_recommendations"
     def _str_(self):
         return self.title
