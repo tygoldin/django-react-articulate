@@ -19,6 +19,12 @@ In the root directory
 ```bash
   pipenv shell # should start django virtual environment
 ```
+
+then
+```bash
+  pip install -r requirements.txt # should start django virtual environment
+```
+
 then 
 ```bash
   python manage.py runserver

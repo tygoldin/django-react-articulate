@@ -29,3 +29,32 @@ class Artwork(models.Model):
 
     def _str_(self):
         return self.title
+<<<<<<< Updated upstream
+=======
+
+class Interactions(models.Model):
+    user = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.CASCADE,
+    )
+    view_count = models.IntegerField(default=0)
+    artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "interactions"
+    def _str_(self):
+        return self.title
+
+class userRecommendations(models.Model):
+    recommendations = models.CharField(max_length=10000)
+    user = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        db_table = "user_recommendations"
+    def _str_(self):
+        return self.title
+>>>>>>> Stashed changes
