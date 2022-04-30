@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ArtworkSerializer
-from .models import Artwork, Interactions
+from .models import Artwork, Interactions, userRecommendations
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -338,3 +338,65 @@ def update_rating(request):
         obj, created = Interactions.objects.update_or_create(user=current_user, artwork=artwork_id,defaults={'rating': rating})
         interactions = Interactions.objects.filter(user=current_user,artwork=artwork_id).values()
         return Response(interactions)
+
+
+@api_view(['GET','POST'])
+def update_user_recommendations(request):
+    if request.method == 'GET':
+        current_user = request.user
+        
+        interactions = pd.DataFrame(Interactions.objects.all().filter(rating__gt=0).values()).drop('view_count',axis=1)
+        
+        users = list(User.objects.values('id'))
+        users = [val for x in users for val in x.values()]
+
+        artworks = pd.DataFrame(Artwork.objects.values('id'))
+
+        recommendations = {}
+
+        input_user = interactions[interactions['user_id']==current_user.id].reset_index().drop(['user_id','index'],axis=1)
+        user_subset = interactions[interactions['artwork_id'].isin(input_user['artwork_id'].tolist())]
+
+        # Get top 100 users with most artworks in common
+        user_subset_grp = sorted(user_subset.groupby(['user_id']), key=lambda x: len(x[1]), reverse=True)
+        user_subset_grp = user_subset_grp[0:100]
+
+        # Calculate pearson correlation coefficient for current user with respect to all other users
+        pearsonCorrelationDict = {}
+
+        for name, group in user_subset_grp:
+            group = group.sort_values(by='artwork_id')
+            input_user = input_user.sort_values(by='artwork_id')
+
+            nRatings = len(group)
+
+            temp_df = input_user[input_user['artwork_id'].isin(group['artwork_id'].tolist())]
+            tempRatingList = temp_df['rating'].tolist()
+            tempGroupList = group['rating'].tolist()
+
+            corr = np.corrcoef(tempRatingList,tempGroupList)[0][1]
+            pearsonCorrelationDict[name] = corr
+
+
+        # Create df with similarity ranking
+        pearsonDF = pd.DataFrame.from_dict(pearsonCorrelationDict, orient='index')
+        pearsonDF.columns = ['corr']
+        pearsonDF['user_id'] = pearsonDF.index
+        pearsonDF.index = range(len(pearsonDF))
+
+        # Merge artworks rated by top 50 similar users
+        # Calculated weighted rating score for artworks as [sum over all users (correlation score * rating)]/[sum of correlation scores]
+        similar_users_top50 = pearsonDF.sort_values(by='corr', ascending=False)[1:51]
+        similar_users_rating = similar_users_top50.merge(interactions,on='user_id',how='inner')
+        similar_users_rating['weighted_rating'] = similar_users_rating['corr']*similar_users_rating['rating']
+
+        artwork_weighted_ratings = similar_users_rating.groupby('artwork_id').sum()[['corr','weighted_rating']].reset_index()
+        artwork_weighted_ratings['recommendation_score'] = artwork_weighted_ratings['weighted_rating']/artwork_weighted_ratings['corr']
+        artwork_weighted_ratings = artwork_weighted_ratings.drop(['corr','weighted_rating'],axis=1)
+
+        # Retrieve recommendations ordered by decreasing recommendation score
+        recos = artwork_weighted_ratings[~artwork_weighted_ratings['artwork_id'].isin(input_user['artwork_id'])].sort_values(by='recommendation_score', ascending=False)['artwork_id']
+
+        obj, created = userRecommendations.objects.update_or_create(user=current_user, defaults={'recommendations': str(recos.tolist()[:100])})
+
+        return Response(None)
