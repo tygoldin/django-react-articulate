@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from faker import Faker
 import numpy as np
 import json
+from django.contrib.auth import authenticate, login, logout
 # Create your views here.
 
 
@@ -313,20 +314,19 @@ def populate_interactions(request):
 
 @api_view(['GET','POST'])
 def update_views(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         current_user = request.user
-        artwork_id = request.GET.get('artwork_id', '')
+        artwork_id = request.data['artwork_id']
         current_art = Artwork.objects.filter(id=artwork_id).values()[0]
 
         interactions = Interactions.objects.filter(user=current_user,artwork=artwork_id).values()
         if len(interactions)>0:
             view_count = interactions[0]['view_count']
-            obj, created = Interactions.objects.update_or_create(user=current_user, artwork=artwork_id,defaults={'view_count': view_count+1})
+            obj, created = Interactions.objects.update_or_create(user=current_user, artwork=current_art,defaults={'view_count': view_count+1})
         else:
             obj, created = Interactions.objects.get_or_create(view_count = 1, rating = 0, user=current_user, artwork_id=artwork_id)
-        
-        interactions = Interactions.objects.filter(user=current_user,artwork=artwork_id).values()
-        return Response(interactions)
+
+        return Response(None)
 
 
 @api_view(['GET','POST'])
@@ -445,3 +445,44 @@ def get_user_recommendations_time_period(request):
             df = pd.DataFrame(random.sample(items, 100 - len(queryset)))
         combined = queryset + df.to_dict('records')
         return Response(combined)
+
+@api_view(['POST'])
+def login_user(request):
+    if request.method == 'POST':
+        username = request.data['username']
+        password = request.data['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+        else:
+            return Response(False)
+        return Response(True)
+
+@api_view(['POST'])
+def logout_user(request):
+    if request.method == 'POST':
+        logout(request)
+        return Response(True)
+
+@api_view(['GET'])
+def check_auth(request):
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            return Response(True)
+        else:
+            return Response(False)
+
+@api_view(['GET'])
+def get_total_interactions(request):
+    if request.method == 'GET':
+        current_user = request.user
+        total_interactions = Interactions.objects.filter(user=current_user).count()
+        return Response(total_interactions)
+
+@api_view(['GET'])
+def get_interacted_artworks(request):
+    if request.method == 'GET':
+        current_user = request.user
+        interactions = Interactions.objects.filter(user=current_user).values_list('artwork_id', flat=True)
+        artworks = Artwork.objects.filter(id__in=interactions).values()
+        return Response(artworks)

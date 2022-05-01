@@ -6,6 +6,7 @@ import {
     Dice3, FilterLeft,
     Globe,
     Grid3x3,
+    BoxArrowRight,
     Map,
     MapFill, Moon,
     Person,
@@ -23,6 +24,8 @@ import {LocationPopup} from "./LocationPopup";
 import {RecommendationPage} from "./RecommendationPage";
 import MultipleSelectChip from "./MultipleSelectChip";
 import {AnalyticsPage} from "./AnalyticsPage";
+import Cookies from "js-cookie";
+import {UserAnalyticsPage} from "./UserAnalyticsPage";
 
 
 const Marker = ({ children }) => children;
@@ -132,6 +135,8 @@ export function ArtMap(props) {
 
     const [showAnalyticsPage, setAnalyticsPage] = useState(false);
 
+    const [showUserAnalyticsPage, setUserAnalyticsPage] = useState(false);
+
     const [form, setForm] = useState([]);
     const [type, setType] = useState([]);
     const [school, setSchool] = useState([]);
@@ -225,7 +230,12 @@ export function ArtMap(props) {
                     <div className="sidenav-icon-cntr">
                         <PersonCircle className="sidenav-icon" size={20} color={"black"} />
                     </div>
-                    <div className="sidenav-text">
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             setRecPage(false);
+                             setAnalyticsPage(false);
+                             setUserAnalyticsPage(!showUserAnalyticsPage);
+                         }}>
                         Account
                     </div>
                 </div>
@@ -237,6 +247,7 @@ export function ArtMap(props) {
                          onClick={() => {
                              setRecPage(false);
                              setAnalyticsPage(false);
+                             setUserAnalyticsPage(false);
                          }}>
                         Google Maps
                     </div>
@@ -248,6 +259,7 @@ export function ArtMap(props) {
                     <div className="sidenav-text"
                          onClick={() => {
                              setAnalyticsPage(!showAnalyticsPage);
+                             setUserAnalyticsPage(false);
                              setRecPage(false);
                          }}>
                         Analytics
@@ -261,8 +273,29 @@ export function ArtMap(props) {
                          onClick={() => {
                              setRecPage(!showRecPage);
                              setAnalyticsPage(false);
+                             setUserAnalyticsPage(false);
                          }}>
                         Recommended
+                    </div>
+                </div>
+                <div className="sidenav-bar">
+                    <div className="sidenav-icon-cntr">
+                        <BoxArrowRight className="sidenav-icon" size={20} color={"black"} />
+                    </div>
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             fetch(`api/logout_user/`, {
+                                 method: 'POST',
+                                 headers: {
+                                     'Accept': 'application/json',
+                                     'Content-Type': 'application/json',
+                                     'X-CSRFToken': Cookies.get('csrftoken')
+                                 },
+                             }).then(() => {
+                                 window.location.reload();
+                             })
+                         }}>
+                        Logout
                     </div>
                 </div>
                 {/*<div className="sidenav-bar" onClick={() => setNightMode(!nightMode)}>*/}
@@ -336,6 +369,15 @@ export function ArtMap(props) {
                            rangeValues={rangeValues}
                            setArtPopup={setArtPopup}/>
 
+            <UserAnalyticsPage checkFilters={checkFilters}
+                           showUserAnalyticsPage={showUserAnalyticsPage}
+                           form={form}
+                           type={type}
+                           school={school}
+                           technique={technique}
+                           rangeValues={rangeValues}
+                           setArtPopup={setArtPopup}/>
+
             <ArtPopup
                 artPopup = {artPopup}
                 setArtPopup = {setArtPopup}
@@ -387,6 +429,9 @@ export function ArtMap(props) {
             >
                 {clusters.map(cluster => {
                     const [longitude, latitude] = cluster.geometry.coordinates;
+                    if (longitude == 0 && latitude == 0){
+                        return
+                    }
                     const {
                         cluster: isCluster,
                         point_count: pointCount

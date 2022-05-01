@@ -44,5 +44,10 @@ urlpatterns = [
     path('api/update_user_recommendations/',views.update_user_recommendations),
     path('api/get_user_recommendations/', views.get_user_recommendations),
     path('api/get_user_recommendations_time_period/', views.get_user_recommendations_time_period),
-    path('api/get_rating/', views.get_rating)
+    path('api/get_rating/', views.get_rating),
+    path('api/login_user/', views.login_user),
+    path('api/logout_user/', views.logout_user),
+    path('api/check_auth/', views.check_auth),
+    path('api/get_total_interactions/', views.get_total_interactions),
+    path('api/get_interacted_artworks/', views.get_interacted_artworks)
 ]

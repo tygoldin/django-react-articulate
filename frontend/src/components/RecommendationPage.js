@@ -21,52 +21,49 @@ export function RecommendationPage(props) {
             in={props.showRecPage}
             timeout={200}
             classNames="my-node">
-            <>
-                {props.showRecPage ?
-                    <div className={props.showRecPage ? "overlay-page" : null}>
-                        <div className="page-scrollable">
-                            <div className="recommendation-content">
-                                <hr />
-                                <div className="recommendation-title">Top Recommendations</div>
-                                <hr />
-                                <div className="recommendation-arrow-cntr">
-                                    {
-                                        index > 0 ?
-                                        <ArrowLeftSquare size={16}
-                                                         color={"black"}
-                                                         onClick={() => setIndex(index - 6)}
-                                                         style={{"cursor":"pointer"}}/> : null
-                                    }
-                                    <div className = "location-popup-art-cntr">
-                                        {
-                                            filteredTopRecs.slice(index, index + 6).map((object, i) => {
-                                                    return <div key = {object.id}>
-                                                        <img className = "location-popup-art-img"
-                                                             src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
-                                                             alt = {object.title}
-                                                             onClick = {() => props.setArtPopup(object)}/>
-                                                        <div className = "location-popup-art-text">{object.title}</div>
-                                                    </div>
-                                            })
-                                        }
-                                    </div>
-                                    {   index < filteredTopRecs.length - 6 ?
-                                        <ArrowRightSquare size={16}
-                                                          color={"black"}
-                                                          onClick={() => setIndex(index + 6)}
-                                                          style={{"cursor":"pointer"}}/> : null
-                                    }
-                                </div>
-                                <hr />
-                                <div className="recommendation-title">Recommendations By Time Period</div>
-                                <hr />
-                                <Timeline rangeValues={props.rangeValues}
-                                          checkFilters={props.checkFilters}
-                                          setArtPopup={props.setArtPopup}/>
+            <div className={props.showRecPage ? "overlay-page" : null}>
+                <div className="page-scrollable">
+                    <div className="recommendation-content">
+                        <hr />
+                        <div className="recommendation-title">Top Recommendations</div>
+                        <hr />
+                        <div className="recommendation-arrow-cntr">
+                            {
+                                index > 0 ?
+                                    <ArrowLeftSquare size={16}
+                                                     color={"black"}
+                                                     onClick={() => setIndex(index - 6)}
+                                                     style={{"cursor":"pointer"}}/> : null
+                            }
+                            <div className = "location-popup-art-cntr">
+                                {
+                                    filteredTopRecs.slice(index, index + 6).map((object, i) => {
+                                        return <div key = {object.id}>
+                                            <img className = "location-popup-art-img"
+                                                 src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
+                                                 alt = {object.title}
+                                                 onClick = {() => props.setArtPopup(object)}/>
+                                            <div className = "location-popup-art-text">{object.title}</div>
+                                        </div>
+                                    })
+                                }
                             </div>
+                            {   index < filteredTopRecs.length - 6 ?
+                                <ArrowRightSquare size={16}
+                                                  color={"black"}
+                                                  onClick={() => setIndex(index + 6)}
+                                                  style={{"cursor":"pointer"}}/> : null
+                            }
                         </div>
-                    </div> : null}
-            </>
+                        <hr />
+                        <div className="recommendation-title">Recommendations By Time Period</div>
+                        <hr />
+                        <Timeline rangeValues={props.rangeValues}
+                                  checkFilters={props.checkFilters}
+                                  setArtPopup={props.setArtPopup}/>
+                    </div>
+                </div>
+            </div>
 
         </CSSTransition>
     )
@@ -92,14 +89,10 @@ export function Timeline(props) {
             <div className="vl"></div>
             {timeframes.map((timeframe) => {
                 return <>
-                          {parseInt(timeframe.substring(0,4)) > props.rangeValues[0] &&
-                           parseInt(timeframe.slice(-4)) <= props.rangeValues[1] ?
-                              <>
-                                  <TimelinePoint timeframe={timeframe}
-                                                 checkFilters={props.checkFilters}
-                                                 setArtPopup={props.setArtPopup}/>
-                                  <div className="vl"></div>
-                              </> : null}
+                         <TimelinePoint timeframe={timeframe}
+                                        checkFilters={props.checkFilters}
+                                        setArtPopup={props.setArtPopup}
+                                        rangeValues={props.rangeValues}/>
                        </>
             })}
         </div>
@@ -131,34 +124,39 @@ export function TimelinePoint(props) {
     }, [])
 
     return (
-        <div className="timeline-point">
-            <div className="timeline-text">
-                {props.timeframe} <br />
-                <div className="timeline-period">{timePeriods[props.timeframe]}</div>
+        parseInt(props.timeframe.substring(0,4)) > props.rangeValues[0] &&
+        parseInt(props.timeframe.slice(-4)) <= props.rangeValues[1] ?
+        <>
+            <div className="timeline-point">
+                <div className="timeline-text">
+                    {props.timeframe} <br />
+                    <div className="timeline-period">{timePeriods[props.timeframe]}</div>
+                </div>
+                <div className="timeline-arrow-cntr">
+                    {index > 0 ? <ArrowLeftSquare size={16}
+                                     color={"black"}
+                                     onClick={() => setIndex(index - 6)}
+                                     style={{"cursor":"pointer"}}/> : null}
+                    {index < filteredArtworks.length - 6 ? <ArrowRightSquare size={16}
+                                      color={"black"}
+                                      onClick={() => setIndex(index + 6)}
+                                      style={{"cursor":"pointer"}}/> : null}
+                </div>
+                <div className = "location-popup-art-cntr">
+                    {
+                        filteredArtworks.slice(index, index + 6).map((object, i) => {
+                            return <div key = {object.id}>
+                                <img className = "location-popup-art-img"
+                                     src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
+                                     alt = {object.title}
+                                     onClick = {() => props.setArtPopup(object)}/>
+                                <div className = "location-popup-art-text">{object.title}</div>
+                            </div>
+                        })
+                    }
+                </div>
             </div>
-            <div className="timeline-arrow-cntr">
-                {index > 0 ? <ArrowLeftSquare size={16}
-                                 color={"black"}
-                                 onClick={() => setIndex(index - 6)}
-                                 style={{"cursor":"pointer"}}/> : null}
-                {index < filteredArtworks.length - 6 ? <ArrowRightSquare size={16}
-                                  color={"black"}
-                                  onClick={() => setIndex(index + 6)}
-                                  style={{"cursor":"pointer"}}/> : null}
-            </div>
-            <div className = "location-popup-art-cntr">
-                {
-                    filteredArtworks.slice(index, index + 6).map((object, i) => {
-                        return <div key = {object.id}>
-                            <img className = "location-popup-art-img"
-                                 src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
-                                 alt = {object.title}
-                                 onClick = {() => props.setArtPopup(object)}/>
-                            <div className = "location-popup-art-text">{object.title}</div>
-                        </div>
-                    })
-                }
-            </div>
-        </div>
+            <div className="vl"></div>
+        </> : null
     )
 }

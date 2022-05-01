@@ -70,7 +70,21 @@ export function ArtPopup(props) {
 
     useEffect(() => {
         setRating(-1);
-        if (props.artPopup) {
+        if (props.artPopup && props.artPopup.id) {
+            fetch(`/api/update_views/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': Cookies.get('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        artwork_id: props.artPopup.id
+                    })}).then(response => response.json())
+                        .then(data => {
+
+                        });
             fetch(`api/get_rating?artwork_id=${encodeURIComponent(props.artPopup.id)}`,
                 {method: "GET"}).then(response => response.json())
                 .then(data => {
