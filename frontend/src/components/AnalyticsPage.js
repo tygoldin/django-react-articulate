@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {CSSTransition} from "react-transition-group";
 import Plot from "react-plotly.js";
+import Cookies from 'js-cookie';
 
 export function AnalyticsPage(props) {
     const [keys, setKeys] = useState([]);
@@ -15,6 +16,7 @@ export function AnalyticsPage(props) {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                'X-CSRFToken': Cookies.get('csrftoken')
             },
             body: JSON.stringify({
                 forms: props.form,
@@ -50,6 +52,7 @@ export function AnalyticsPage(props) {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                'X-CSRFToken': Cookies.get('csrftoken')
             },
             body: JSON.stringify({
                 forms: props.form,

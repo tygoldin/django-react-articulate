@@ -265,21 +265,6 @@ export function ArtMap(props) {
                         Recommended
                     </div>
                 </div>
-                <div className="sidenav-bar">
-                    <div className="sidenav-icon-cntr">
-                        <Dice3 className="sidenav-icon" size={20} color={"black"} />
-                    </div>
-                    <div className="sidenav-text"
-                         onClick={() => {
-                             fetch(`/api/get_random_artwork/`,
-                                 {method: "GET"}).then(response => response.json())
-                                 .then(data => {
-                                     setArtPopup(data);
-                                 });
-                         }}>
-                        Random
-                    </div>
-                </div>
                 {/*<div className="sidenav-bar" onClick={() => setNightMode(!nightMode)}>*/}
                 {/*    <div className="sidenav-icon-cntr">*/}
                 {/*        <Moon className="sidenav-icon" size={20} color={"black"} />*/}

@@ -9,7 +9,7 @@ export function RecommendationPage(props) {
 
 
     useEffect(() => {
-        fetch(`api/get_random_artworks/`,
+        fetch(`api/get_user_recommendations/`,
             {method: "GET"}).then(response => response.json())
             .then(data => {
                 setTopRecs(data);
@@ -123,7 +123,7 @@ export function TimelinePoint(props) {
     const [index, setIndex] = useState(0)
 
     useEffect(() => {
-        fetch(`/api/get_random_artworks_time_period?timeframe=${encodeURIComponent(props.timeframe)}`,
+        fetch(`/api/get_user_recommendations_time_period?timeframe=${encodeURIComponent(props.timeframe)}`,
             {method: "GET"}).then(response => response.json())
             .then(data => {
                 setTimelineArtworks(data);

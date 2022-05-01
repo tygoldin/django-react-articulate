@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ArtworkSerializer
-from .models import Artwork, Interactions
+from .models import Artwork, Interactions, userRecommendations
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -9,10 +9,12 @@ import csv
 import pandas as pd
 import random
 from django.db.models import Q
+from django.db.models import Case, When
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from faker import Faker
 import numpy as np
+import json
 # Create your views here.
 
 
@@ -329,12 +331,51 @@ def update_views(request):
 
 @api_view(['GET','POST'])
 def update_rating(request):
+    if request.method == 'POST':
+        current_user = request.user
+        artwork_id = request.data['artwork_id']
+        rating = request.data['rating']
+        current_art = Artwork.objects.get(id=artwork_id)
+
+        obj, created = Interactions.objects.update_or_create(user=current_user, artwork=current_art,defaults={'rating': rating})
+        interactions = Interactions.objects.filter(user=current_user,artwork=artwork_id).values()
+        return Response(interactions)
+
+@api_view(['GET'])
+def get_rating(request):
     if request.method == 'GET':
         current_user = request.user
         artwork_id = request.GET.get('artwork_id', '')
-        rating = request.GET.get('rating', '')
-        current_art = Artwork.objects.filter(id=artwork_id).values()[0]
+        interactions = Interactions.objects.filter(user=current_user,artwork=int(artwork_id)).values()
+        if len(interactions) > 0:
+            return Response(interactions[0]['rating'])
+        else:
+            return Response(0)
 
-        obj, created = Interactions.objects.update_or_create(user=current_user, artwork=artwork_id,defaults={'rating': rating})
-        interactions = Interactions.objects.filter(user=current_user,artwork=artwork_id).values()
-        return Response(interactions)
+@api_view(['GET'])
+def get_user_recommendations(request):
+    if request.method == 'GET':
+        current_user = request.user
+        recommendations = userRecommendations.objects.filter(user=current_user).values()[0]
+        rec_list = json.loads(recommendations['recommendations'])
+        preserved = Case(*[When(id=id, then=pos) for pos, id in enumerate(rec_list)])
+        queryset = Artwork.objects.filter(id__in=rec_list).order_by(preserved).values()
+        return Response(queryset)
+
+@api_view(['GET'])
+def get_user_recommendations_time_period(request):
+    if request.method == 'GET':
+        timeframe = request.GET.get('timeframe', '')
+        current_user = request.user
+        recommendations = userRecommendations.objects.filter(user=current_user).values()[0]
+        rec_list = json.loads(recommendations['recommendations'])
+        preserved = Case(*[When(id=id, then=pos) for pos, id in enumerate(rec_list)])
+        artworks = Artwork.objects.filter(timeframe=timeframe).values()
+        queryset = list(Artwork.objects.filter(timeframe=timeframe).filter(id__in=rec_list).order_by(preserved).values())
+        items = list(Artwork.objects.filter(timeframe=timeframe).values())
+        if len(items) < (100 - len(queryset)):
+            df = pd.DataFrame(random.sample(items, len(items) - 1 - len(queryset)))
+        else:
+            df = pd.DataFrame(random.sample(items, 100 - len(queryset)))
+        combined = queryset + df.to_dict('records')
+        return Response(combined)
