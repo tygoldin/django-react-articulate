@@ -518,3 +518,8 @@ hr {
 .margin-btm {
   margin-bottom: 5px;
 }
+
+.rating-slider {
+  margin-left: 20px;
+  margin-right: 20px;
+}

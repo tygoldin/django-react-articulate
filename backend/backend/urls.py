@@ -41,5 +41,8 @@ urlpatterns = [
     path('api/populate_interactions/',views.populate_interactions),
     path('api/update_views/',views.update_views),
     path('api/update_rating/',views.update_rating),
-    path('api/update_user_recommendations/',views.update_user_recommendations)
+    path('api/update_user_recommendations/',views.update_user_recommendations),
+    path('api/get_user_recommendations/', views.get_user_recommendations),
+    path('api/get_user_recommendations_time_period/', views.get_user_recommendations_time_period),
+    path('api/get_rating/', views.get_rating)
 ]

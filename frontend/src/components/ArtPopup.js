@@ -3,8 +3,9 @@ import {ClipboardData, PieChart, QuestionCircle, QuestionSquare, Shuffle, XSquar
 import Zoom from "react-medium-image-zoom";
 import { Controlled as ControlledZoom } from "react-medium-image-zoom";
 import {CSSTransition} from "react-transition-group";
-import {hslToRgb, Tooltip} from "@mui/material";
+import {hslToRgb, Tooltip, Slider} from "@mui/material";
 import Plot from "react-plotly.js";
+import Cookies from 'js-cookie';
 
 export function ArtPopup(props) {
 
@@ -20,48 +21,102 @@ export function ArtPopup(props) {
     const myRef = useRef(null);
     const executeScroll = () => myRef.current.scrollIntoView();
 
+    const marks = [
+        {
+            value: 0,
+            label: 'N/A'
+        },
+        {
+            value: 1,
+            label: '1',
+        },
+        {
+            value: 2,
+            label: '2',
+        },
+        {
+            value: 3,
+            label: '3',
+        },
+        {
+            value: 4,
+            label: '4',
+        },
+        {
+            value: 5,
+            label: '5',
+        },
+    ];
+
     const [isZoomed, setZoom] = useState(false);
+    const [rating, setRating] = useState(3);
+
+    const handleChange = (event, newValue) => {
+        console.log(newValue)
+        fetch(`api/update_rating/`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': Cookies.get('csrftoken')
+            },
+            body: JSON.stringify({
+                artwork_id: props.artPopup.id,
+                rating: newValue
+            }),
+        })
+        setRating(newValue);
+    };
 
     useEffect(() => {
-        fetch(`api/get_recommendations?artwork_id=${encodeURIComponent(props.artPopup.id)}`,
-            {method: "GET"}).then(response => response.json())
-            .then(data => {
-                setArtRecs(data);
-            });
-        let hsl = ""
-        let weights = [];
-        let other = 1;
-        if (props.artPopup && props.artPopup.color_1) {
-            hsl = JSON.parse(props.artPopup.color_1)
-            setColor1('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
-            weights.push(hsl[3]);
-            other = other - hsl[3];
+        setRating(-1);
+        if (props.artPopup) {
+            fetch(`api/get_rating?artwork_id=${encodeURIComponent(props.artPopup.id)}`,
+                {method: "GET"}).then(response => response.json())
+                .then(data => {
+                    setRating(data);
+                });
+
+            fetch(`api/get_recommendations?artwork_id=${encodeURIComponent(props.artPopup.id)}`,
+                {method: "GET"}).then(response => response.json())
+                .then(data => {
+                    setArtRecs(data);
+                });
+            let hsl = ""
+            let weights = [];
+            let other = 1;
+            if (props.artPopup && props.artPopup.color_1) {
+                hsl = JSON.parse(props.artPopup.color_1)
+                setColor1('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
+                weights.push(hsl[3]);
+                other = other - hsl[3];
+            }
+            if (props.artPopup && props.artPopup.color_2) {
+                hsl = JSON.parse(props.artPopup.color_2)
+                setColor2('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
+                weights.push(hsl[3]);
+                other = other - hsl[3];
+            }
+            if (props.artPopup && props.artPopup.color_3) {
+                hsl = JSON.parse(props.artPopup.color_3)
+                setColor3('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
+                weights.push(hsl[3]);
+                other = other - hsl[3];
+            }
+            if (props.artPopup && props.artPopup.color_4) {
+                hsl = JSON.parse(props.artPopup.color_4)
+                setColor4('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
+                weights.push(hsl[3]);
+                other = other - hsl[3];
+            }
+            if (props.artPopup && props.artPopup.color_5) {
+                hsl = JSON.parse(props.artPopup.color_5)
+                setColor5('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
+                weights.push(hsl[3]);
+                other = other - hsl[3];
+            }
+            setColorWeights([...weights, other])
         }
-        if (props.artPopup && props.artPopup.color_2) {
-            hsl = JSON.parse(props.artPopup.color_2)
-            setColor2('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
-            weights.push(hsl[3]);
-            other = other - hsl[3];
-        }
-        if (props.artPopup && props.artPopup.color_3) {
-            hsl = JSON.parse(props.artPopup.color_3)
-            setColor3('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
-            weights.push(hsl[3]);
-            other = other - hsl[3];
-        }
-        if (props.artPopup && props.artPopup.color_4) {
-            hsl = JSON.parse(props.artPopup.color_4)
-            setColor4('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
-            weights.push(hsl[3]);
-            other = other - hsl[3];
-        }
-        if (props.artPopup && props.artPopup.color_5) {
-            hsl = JSON.parse(props.artPopup.color_5)
-            setColor5('hsl(' + hsl[0] + ',' + hsl[1]*100/255 + '%,' + hsl[2]*100/255 + '%)');
-            weights.push(hsl[3]);
-            other = other - hsl[3];
-        }
-        setColorWeights([...weights, other])
     }, [props.artPopup, shuffle])
 
     return (
@@ -92,6 +147,19 @@ export function ArtPopup(props) {
                                      alt = {props.artPopup.title}
                                      ref={myRef}/>
                             </Zoom>
+                            <hr className="less_thick_hr"/>
+                            <div className="rating-slider">
+                                {rating == -1 ? null :
+                                <Slider defaultValue={3}
+                                        value={rating}
+                                        onChangeCommitted={handleChange}
+                                        size="small"
+                                        step={1}
+                                        min={0}
+                                        max={5}
+                                        marks={marks}
+                                />}
+                            </div>
                             <hr className="less_thick_hr"/>
                             {props.artPopup.descriptions && props.artPopup.descriptions.length > 0 ?
                                 <><div className = "art-popup-text"><b>Description:</b></div>
