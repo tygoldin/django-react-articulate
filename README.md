@@ -25,6 +25,11 @@ then
   pip install -r requirements.txt
 ```
 
+Note: If having trouble installing mysqlclient, run
+```bash
+  sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+```
+
 then 
 ```bash
   python manage.py runserver
