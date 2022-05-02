@@ -2,6 +2,9 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ArtworkSerializer
 from .models import Artwork, Interactions, userRecommendations
+from .models import (Top100ArtworksByViews, Top100ArtworksByRatings, TopCategoriesForm, TopCategoriesType,
+                    Top100ArtistsByViews, TopTimeframesByViews, TopCategoriesByRatingsForm, TopCategoriesByRatingsType,
+                    Top100LocationsByRatings, Top100LocationsByViews)
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -554,3 +557,76 @@ def get_overall_trends(request):
         df = pd.DataFrame(list(Interactions.objects.all()))
         return Response(None)
 
+@api_view(['GET'])
+def get_top_artworks_by_views(request):
+    if request.method == 'GET':
+        df = pd.DataFrame(list(Top100ArtworksByViews.objects.all().values()))
+        artwork_ids = df['artwork_id']
+        artwork_views = df['views']
+        preserved = Case(*[When(id=id, then=pos) for pos, id in enumerate(artwork_ids)])
+        queryset = pd.DataFrame(list(Artwork.objects.filter(id__in=artwork_ids).order_by(preserved).values()))
+        queryset['views'] = artwork_views
+        return Response(queryset.to_dict('records'))
+
+@api_view(['GET'])
+def get_top_artworks_by_rating(request):
+    if request.method == 'GET':
+        df = pd.DataFrame(list(Top100ArtworksByRatings.objects.all().values()))
+        artwork_ids = df['artwork_id']
+        avg_ratings = df['avg_rating']
+        preserved = Case(*[When(id=id, then=pos) for pos, id in enumerate(artwork_ids)])
+        queryset = pd.DataFrame(list(Artwork.objects.filter(id__in=artwork_ids).order_by(preserved).values()))
+        queryset['avg_rating'] = avg_ratings
+        return Response(queryset.to_dict('records'))
+
+@api_view(['GET'])
+def get_top_categories_form(request):
+    if request.method == 'GET':
+        forms = TopCategoriesForm.objects.all().values()
+
+        return Response(forms)
+
+@api_view(['GET'])
+def get_top_categories_type(request):
+    if request.method == 'GET':
+        types = TopCategoriesType.objects.all().values()
+        return Response(types)
+
+@api_view(['GET'])
+def get_top_100_artists_by_views(request):
+    if request.method == 'GET':
+        artists = Top100ArtistsByViews.objects.all().values()
+        return Response(artists)
+
+@api_view(['GET'])
+def get_top_timeframes_by_views(request):
+    if request.method == 'GET':
+        df = pd.DataFrame(list(TopTimeframesByViews.objects.all().values()))
+        df = df.sort_values(by="timeframe")
+        keys = df['timeframe']
+        values = df['popularity']
+        return Response({"keys": keys, "values": values})
+
+@api_view(['GET'])
+def get_top_categories_by_rating_form(request):
+    if request.method == 'GET':
+        forms = TopCategoriesByRatingsForm.objects.all().values()
+        return Response(forms)
+
+@api_view(['GET'])
+def get_top_categories_by_rating_type(request):
+    if request.method == 'GET':
+        types = TopCategoriesByRatingsType.objects.all().values()
+        return Response(types)
+
+@api_view(['GET'])
+def get_top_locations_by_ratings(request):
+    if request.method == 'GET':
+        locations = Top100LocationsByRatings.objects.all().values()
+        return Response(locations)
+
+@api_view(['GET'])
+def get_top_locations_by_views(request):
+    if request.method == 'GET':
+        locations = Top100LocationsByViews.objects.all().values()
+        return Response(locations)

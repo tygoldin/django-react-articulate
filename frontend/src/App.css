@@ -575,3 +575,7 @@ hr {
   font-size: 16px;
   color: black;
 }
+
+.select-smaller {
+  height: 30px;
+}

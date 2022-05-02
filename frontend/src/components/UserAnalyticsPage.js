@@ -13,6 +13,15 @@ export function UserAnalyticsPage(props) {
     const [artworks, setArtworks] = useState([]);
     const [pieField, setPieField] = useState('type');
     const [pieData, setPieData] = useState({});
+    const [topCatField, setTopCatField] = useState('type');
+    const [topCategories, setTopCategories] = useState([]);
+    const [topCatFieldRating, setTopCatFieldRating] = useState('type');
+    const [topCategoriesRating, setTopCategoriesRating] = useState([]);
+    const [topTimeframeData, setTopTimeframeData] = useState({});
+    const [topArtworkField, setTopArtworkField] = useState("rating");
+    const [topArtworks, setTopArtworks] = useState([]);
+    const [topLocationField, setTopLocationField] = useState("ratings");
+    const [topLocations, setTopLocations] = useState([]);
 
     useEffect(() => {
         fetch('/api/get_total_interactions/')
@@ -67,6 +76,54 @@ export function UserAnalyticsPage(props) {
             })
     }, [pieField, props.form, props.school, props.type, props.technique])
 
+    useEffect(() => {
+        fetch('api/get_top_categories_' + topCatField ,
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopCategories(data.slice(0,5));
+            });
+    }, [topCatField])
+
+    useEffect(() => {
+        fetch('api/get_top_categories_by_rating_' + topCatFieldRating ,
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopCategoriesRating(data.slice(0,5));
+            });
+    }, [topCatFieldRating])
+
+    useEffect(() => {
+        fetch('api/get_top_timeframes_by_views' + topCatFieldRating ,
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopCategoriesRating(data.slice(0,5));
+            });
+    }, [topCatFieldRating])
+
+    useEffect(() => {
+        fetch('api/get_top_timeframes_by_views/',
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopTimeframeData(data);
+            });
+    }, [])
+
+    useEffect(() => {
+        fetch('api/get_top_artworks_by_' + topArtworkField,
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopArtworks(data);
+            });
+    }, [topArtworkField])
+
+    useEffect(() => {
+        fetch('api/get_top_locations_by_' + topLocationField,
+            {method: "GET"}).then(response => response.json())
+            .then(data => {
+                setTopLocations(data.slice(0,5));
+            });
+    }, [topLocationField])
+
     return (
         <CSSTransition
             in={props.showUserAnalyticsPage}
@@ -77,6 +134,90 @@ export function UserAnalyticsPage(props) {
                     <div className="overlay-page overlay-over-timeline">
                         <div className="page-scrollable">
                             <div className="recommendation-content">
+                                <hr />
+                                <div className="recommendation-title">Overall Trends</div>
+                                <hr />
+                                <div style={{color: "black"}}>Most popular categories by <Select
+                                    value={topCatField}
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    className="select-smaller"
+                                    onChange={(event) => {setTopCatField(event.target.value)}}
+                                >
+                                    <MenuItem value={"type"}>type</MenuItem>
+                                    <MenuItem value={"form"}>form</MenuItem>
+                                </Select></div>
+                                {topCategories.map((item, index) => {
+                                    return <div style={{color: "black"}}>{index + 1}. {item[topCatField]} ({item['popularity']})</div>
+                                    }
+                                )}
+                                <div style={{color: "black"}}>Highest rated categories by <Select
+                                    value={topCatFieldRating}
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    className="select-smaller"
+                                    onChange={(event) => {setTopCatFieldRating(event.target.value)}}
+                                >
+                                    <MenuItem value={"type"}>type</MenuItem>
+                                    <MenuItem value={"form"}>form</MenuItem>
+                                </Select></div>
+                                {topCategoriesRating.map((item, index) => {
+                                        return <div style={{color: "black"}}>{index + 1}. {item[topCatFieldRating]} ({item['avg_rating']})</div>
+                                    }
+                                )}
+                                <hr />
+                                <Plot
+                                    data={[
+                                        {type: 'bar', x: topTimeframeData['keys'], y: topTimeframeData['values']},
+                                    ]}
+                                    layout={{width: "100%", height: 500,
+                                        title: "Most popular Timeframes",
+                                        yaxis: {
+                                            range: [topTimeframeData['values'] ? Math.min(...topTimeframeData['values']) - .01 : 0,
+                                                    topTimeframeData['values'] ? Math.max(...topTimeframeData['values']) + .01 : 10]
+                                        }
+                                    }}
+                                />
+                                <hr />
+                                <div style={{color: "black"}}>Top artworks by <Select
+                                    value={topArtworkField}
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    className="select-smaller"
+                                    onChange={(event) => {setTopArtworkField(event.target.value)}}
+                                >
+                                    <MenuItem value={"rating"}>rating</MenuItem>
+                                    <MenuItem value={"views"}>views</MenuItem>
+                                </Select></div>
+                                <br />
+                                <div className = "analytics-art-cntr">
+
+                                    {topArtworks.map((object, i) => {
+                                        return <div key = {object.id}>
+                                            <img className = "location-popup-art-img"
+                                                 src = {'https://www.wga.hu/detail/' + object.url.split("/html/").pop().slice(0, -4) + "jpg"}
+                                                 alt = {object.title + " (" + object[topArtworkField == "rating" ? "avg_rating" : "views"] + ")"}
+                                                 onClick = {() => props.setArtPopup(object)}/>
+                                            <div className = "location-popup-art-text">{object.title + " (" + object[topArtworkField == "rating" ? "avg_rating" : "views"] + ")"}</div>
+                                        </div>
+                                    })
+                                    }
+                                </div>
+                                <br />
+                                <div style={{color: "black"}}>Most popular locations by <Select
+                                    value={topLocationField}
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    className="select-smaller"
+                                    onChange={(event) => {setTopLocationField(event.target.value)}}
+                                >
+                                    <MenuItem value={"ratings"}>rating</MenuItem>
+                                    <MenuItem value={"views"}>views</MenuItem>
+                                </Select></div>
+                                {topLocations.map((item, index) => {
+                                        return <div style={{color: "black"}}>{index + 1}. {item['location']} ({item[topLocationField == "ratings" ? "avg_rating" : "views"] ? item[topLocationField == "ratings" ? "avg_rating" : "views"].toLocaleString("en-US") : null})</div>
+                                    }
+                                )}
                                 <hr />
                                 <div className="recommendation-title">User Analytics</div>
                                 <hr />
