@@ -51,5 +51,15 @@ urlpatterns = [
     path('api/get_total_interactions/', views.get_total_interactions),
     path('api/get_interacted_artworks/', views.get_interacted_artworks),
     path('api/get_interacted_artworks_by_field/', views.get_interacted_artworks_by_field),
-    path('api/get_overall_trends/', views.get_overall_trends)
+    path('api/get_overall_trends/', views.get_overall_trends),
+    path('api/get_top_artworks_by_views/', views.get_top_artworks_by_views),
+    path('api/get_top_artworks_by_rating/', views.get_top_artworks_by_rating),
+    path('api/get_top_categories_form/', views.get_top_categories_form),
+    path('api/get_top_categories_type/', views.get_top_categories_type),
+    path('api/get_top_100_artists_by_views/', views.get_top_100_artists_by_views),
+    path('api/get_top_timeframes_by_views/', views.get_top_timeframes_by_views),
+    path('api/get_top_categories_by_rating_form/', views.get_top_categories_by_rating_form),
+    path('api/get_top_categories_by_rating_type/', views.get_top_categories_by_rating_type),
+    path('api/get_top_locations_by_ratings/', views.get_top_locations_by_ratings),
+    path('api/get_top_locations_by_views/', views.get_top_locations_by_views)
 ]
