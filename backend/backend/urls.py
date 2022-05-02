@@ -49,5 +49,7 @@ urlpatterns = [
     path('api/logout_user/', views.logout_user),
     path('api/check_auth/', views.check_auth),
     path('api/get_total_interactions/', views.get_total_interactions),
-    path('api/get_interacted_artworks/', views.get_interacted_artworks)
+    path('api/get_interacted_artworks/', views.get_interacted_artworks),
+    path('api/get_interacted_artworks_by_field/', views.get_interacted_artworks_by_field),
+    path('api/get_overall_trends/', views.get_overall_trends)
 ]

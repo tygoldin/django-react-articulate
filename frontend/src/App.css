@@ -556,3 +556,22 @@ hr {
   font-weight: bold;
   text-align: center;
 }
+
+.field-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.pie-chart-and-field {
+  display: flex;
+  flex-direction: row;
+}
+
+.top-rated {
+  font-size: 16px;
+  color: black;
+}

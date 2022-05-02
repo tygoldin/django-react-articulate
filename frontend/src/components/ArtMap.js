@@ -228,19 +228,6 @@ export function ArtMap(props) {
             <div className = "sidenav">
                 <div className="sidenav-bar">
                     <div className="sidenav-icon-cntr">
-                        <PersonCircle className="sidenav-icon" size={20} color={"black"} />
-                    </div>
-                    <div className="sidenav-text"
-                         onClick={() => {
-                             setRecPage(false);
-                             setAnalyticsPage(false);
-                             setUserAnalyticsPage(!showUserAnalyticsPage);
-                         }}>
-                        Account
-                    </div>
-                </div>
-                <div className="sidenav-bar">
-                    <div className="sidenav-icon-cntr">
                         <Globe className="sidenav-icon" size={20} color={"black"} />
                     </div>
                     <div className="sidenav-text"
@@ -250,6 +237,19 @@ export function ArtMap(props) {
                              setUserAnalyticsPage(false);
                          }}>
                         Google Maps
+                    </div>
+                </div>
+                <div className="sidenav-bar">
+                    <div className="sidenav-icon-cntr">
+                        <PersonCircle className="sidenav-icon" size={20} color={"black"} />
+                    </div>
+                    <div className="sidenav-text"
+                         onClick={() => {
+                             setRecPage(false);
+                             setAnalyticsPage(false);
+                             setUserAnalyticsPage(!showUserAnalyticsPage);
+                         }}>
+                        User Trends
                     </div>
                 </div>
                 <div className="sidenav-bar">

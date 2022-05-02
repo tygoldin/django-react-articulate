@@ -477,12 +477,80 @@ def get_total_interactions(request):
     if request.method == 'GET':
         current_user = request.user
         total_interactions = Interactions.objects.filter(user=current_user).count()
-        return Response(total_interactions)
+        df = pd.DataFrame(Interactions.objects.filter(user=current_user).values())
+        total_views = df['view_count'].sum()
+        average_rating = df['rating'].replace(0, np.NaN).mean()
+        return Response({'total_interactions': total_interactions,
+                         'total_views': total_views,
+                         'average_rating': average_rating})
+
+@api_view(['POST'])
+def get_interacted_artworks(request):
+    if request.method == 'POST':
+        current_user = request.user
+        forms = request.data['forms']
+        types = request.data['types']
+        schools = request.data['schools']
+        techniques = request.data['techniques']
+        form_filter_query = Q()
+        for form in forms:
+            form_filter_query.add(Q(form=form), Q.OR)
+        type_filter_query = Q()
+        for type in types:
+            type_filter_query.add(Q(type=type), Q.OR)
+        school_filter_query = Q()
+        for school in schools:
+            school_filter_query.add(Q(school=school), Q.OR)
+        technique_filter_query = Q()
+        for technique in techniques:
+            technique_filter_query.add(Q(technique__contains=technique), Q.OR)
+        filter_query = Q()
+        filter_query.add(form_filter_query, Q.AND)
+        filter_query.add(type_filter_query, Q.AND)
+        filter_query.add(school_filter_query, Q.AND)
+        filter_query.add(technique_filter_query, Q.AND)
+        interactions = Interactions.objects.filter(user=current_user).values_list('artwork_id', flat=True)
+        artworks = Artwork.objects.filter(id__in=interactions).filter(filter_query).values()
+        return Response(artworks)
+
+@api_view(['POST'])
+def get_interacted_artworks_by_field(request):
+    if request.method == 'POST':
+        current_user = request.user
+        field = request.data['field']
+        forms = request.data['forms']
+        types = request.data['types']
+        schools = request.data['schools']
+        techniques = request.data['techniques']
+        form_filter_query = Q()
+        for form in forms:
+            form_filter_query.add(Q(form=form), Q.OR)
+        type_filter_query = Q()
+        for type in types:
+            type_filter_query.add(Q(type=type), Q.OR)
+        school_filter_query = Q()
+        for school in schools:
+            school_filter_query.add(Q(school=school), Q.OR)
+        technique_filter_query = Q()
+        for technique in techniques:
+            technique_filter_query.add(Q(technique__contains=technique), Q.OR)
+        filter_query = Q()
+        filter_query.add(form_filter_query, Q.AND)
+        filter_query.add(type_filter_query, Q.AND)
+        filter_query.add(school_filter_query, Q.AND)
+        filter_query.add(technique_filter_query, Q.AND)
+        interactions = Interactions.objects.filter(user=current_user).values_list('artwork_id', flat=True)
+        artworks = list(Artwork.objects.filter(id__in=interactions).filter(filter_query).values())
+        df = pd.DataFrame(artworks)
+        if df.empty:
+            return Response({})
+        df = df.groupby([field]).size()
+        keys = df.keys()
+        return Response({'keys': keys, 'values': list(df)})
 
 @api_view(['GET'])
-def get_interacted_artworks(request):
+def get_overall_trends(request):
     if request.method == 'GET':
-        current_user = request.user
-        interactions = Interactions.objects.filter(user=current_user).values_list('artwork_id', flat=True)
-        artworks = Artwork.objects.filter(id__in=interactions).values()
-        return Response(artworks)
+        df = pd.DataFrame(list(Interactions.objects.all()))
+        return Response(None)
+
